@@ -12,8 +12,12 @@ public record ResearchPaperResponse(
         Long id,
         String title,
         String abstractText,
+        String keywords,
         Long authorId,
-        String fileUrl,
+        String fileName,
+        String contentType,
+        Long fileSize,
+        String storageKey,
         ResearchStatus status,
         ResearchVisibility visibility,
         LocalDateTime createdAt

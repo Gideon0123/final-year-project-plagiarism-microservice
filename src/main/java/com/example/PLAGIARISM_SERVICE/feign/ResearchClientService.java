@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 @FeignClient(
         name = "RESEARCH-SERVICE",
+        contextId = "researchClientService",
         configuration = FeignConfig.class
 )
 public interface ResearchClientService {
