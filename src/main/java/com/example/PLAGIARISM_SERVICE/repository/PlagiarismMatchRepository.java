@@ -10,4 +10,5 @@ import java.util.List;
 public interface PlagiarismMatchRepository extends JpaRepository<PlagiarismMatch, Long> {
 
     List<PlagiarismMatch> findByPlagiarismCheckId(Long plagiarismCheckId);
+
 }
