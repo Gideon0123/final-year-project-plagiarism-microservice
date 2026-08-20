@@ -5,6 +5,7 @@ import com.example.PLAGIARISM_SERVICE.dto.ApiResponse;
 import com.example.PLAGIARISM_SERVICE.dto.ResearchFileResponse;
 import com.example.PLAGIARISM_SERVICE.dto.ResearchPaperResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -20,8 +21,10 @@ public interface ResearchFeignClient {
             @PathVariable("paperId") Long paperId
     );
 
-    @GetMapping("/research/papers/{paperId}/file")
-    ApiResponse<ResearchFileResponse> getResearchFile(
-            @PathVariable("paperId") Long paperId
+    @GetMapping(
+            value = "/research/papers/{paperId}/file"
+    )
+    ResponseEntity<byte[]> downloadResearchFile(
+            @PathVariable Long paperId
     );
 }

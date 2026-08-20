@@ -35,7 +35,7 @@ public class ResearchFileServiceImpl implements ResearchFileService {
          * Ask Research Service for file information.
          */
         ApiResponse<ResearchFileResponse> response =
-                researchFeignClient.getResearchFile(
+                researchFeignClient.downloadResearchFile(
                         paperId
                 );
 
