@@ -4,7 +4,7 @@ import com.example.PLAGIARISM_SERVICE.dto.ApiResponse;
 import com.example.PLAGIARISM_SERVICE.dto.ExtractedTextResponse;
 import com.example.PLAGIARISM_SERVICE.dto.ResearchFileResponse;
 import com.example.PLAGIARISM_SERVICE.exceptions.ResourceNotFoundException;
-import com.example.PLAGIARISM_SERVICE.feign.ResearchFeignClient;
+import com.example.PLAGIARISM_SERVICE.feign.ResearchFileClient;
 import com.example.PLAGIARISM_SERVICE.service.FileDownloadService;
 import com.example.PLAGIARISM_SERVICE.service.ResearchFileService;
 import com.example.PLAGIARISM_SERVICE.service.TextExtractionService;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ResearchFileServiceImpl implements ResearchFileService {
 
-    private final ResearchFeignClient researchFeignClient;
+    private final ResearchFileClient researchFileClient;
     private final FileDownloadService fileDownloadService;
     private final TextExtractionService textExtractionService;
 
@@ -26,61 +26,62 @@ public class ResearchFileServiceImpl implements ResearchFileService {
             Long paperId
     ) {
         log.info(
-                "Retrieving research file for paperId={}",
+                "Starting file retrieval for paperId={}",
                 paperId
         );
 
         /*
-         * Step 1:
-         * Ask Research Service for file information.
+         * STEP 1
+         * Retrieve file metadata.
          */
         ApiResponse<ResearchFileResponse> response =
-                researchFeignClient.downloadResearchFile(
+                researchFileClient.getResearchFileMetadata(
                         paperId
                 );
 
         if (response == null || !response.isSuccess() || response.getData() == null) {
 
             throw new ResourceNotFoundException(
-                    "Research file information not found for paper: "
+                    "Research file metadata not found for paper: "
                             + paperId
             );
         }
 
-        ResearchFileResponse file = response.getData();
+
+        ResearchFileResponse metadata = response.getData();
 
         /*
-         * Step 2:
-         * Validate the file information.
+         * STEP 2
+         * Validate metadata.
          */
-        validateFile(file);
+        validateFile(metadata);
 
         /*
-         * Step 3:
-         * Download the actual file.
+         * STEP 3
+         * Download actual bytes.
          */
-        byte[] fileBytes =
-                fileDownloadService.downloadFile(
-                        file.downloadUrl()
-                );
+        byte[] fileBytes = fileDownloadService.downloadResearchFile(
+                paperId
+        );
 
         /*
-         * Step 4:
+         * STEP 4
          * Extract text.
          */
-        ExtractedTextResponse extractedText =
-                textExtractionService.extractText(
-                        fileBytes,
-                        file.fileName()
-                );
+        ExtractedTextResponse extractedText = textExtractionService.extractText(
+                fileBytes,
+                metadata.fileName()
+        );
 
         log.info(
                 "Successfully retrieved and extracted paperId={}",
                 paperId
         );
 
+
         return extractedText;
     }
+
 
     private void validateFile(
             ResearchFileResponse file
@@ -92,21 +93,19 @@ public class ResearchFileServiceImpl implements ResearchFileService {
             );
         }
 
-        if (file.downloadUrl() == null || file.downloadUrl().isBlank()) {
+        String fileName = file.fileName().toLowerCase();
 
-            throw new IllegalStateException(
-                    "Research file does not have a download URL"
+        if (!fileName.endsWith(".pdf") && !fileName.endsWith(".docx")) {
+
+            throw new IllegalArgumentException(
+                    "Unsupported research file format: " + file.fileName()
             );
         }
 
-        String fileName = file.fileName().toLowerCase();
+        if (file.fileSize() == null || file.fileSize() <= 0) {
 
-        if (!fileName.endsWith(".pdf") &&
-                !fileName.endsWith(".docx")) {
-
-            throw new IllegalArgumentException(
-                    "Unsupported research file format: "
-                            + file.fileName()
+            throw new IllegalStateException(
+                    "Research file has an invalid file size"
             );
         }
     }

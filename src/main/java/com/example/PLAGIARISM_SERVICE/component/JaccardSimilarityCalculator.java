@@ -37,9 +37,9 @@ public class JaccardSimilarityCalculator {
             return 0.0;
         }
 
-//        return ((double) intersection.size()
-//                / union.size()) * 100.0;
-        return round(intersection.size());
+        double value = ((double) intersection.size()
+                / union.size()) * 100.0;
+        return round(value);
     }
 
     private double round(double value) {

@@ -29,11 +29,9 @@ public class PlagiarismTestController {
             @PathVariable Long paperId,
             HttpServletRequest request
     ) {
-
-        ExtractedTextResponse response =
-                researchFileService.retrieveAndExtract(
-                        paperId
-                );
+        ExtractedTextResponse response = researchFileService.retrieveAndExtract(
+                paperId
+        );
 
         return ResponseEntity.ok(
                 ApiResponse.<ExtractedTextResponse>builder()

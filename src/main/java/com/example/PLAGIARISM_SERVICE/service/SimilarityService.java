@@ -1,7 +1,7 @@
 package com.example.PLAGIARISM_SERVICE.service;
 
 import com.example.PLAGIARISM_SERVICE.dto.ComparisonDocument;
-import com.example.PLAGIARISM_SERVICE.enums.SimilarityResult;
+import com.example.PLAGIARISM_SERVICE.dto.SimilarityResult;
 
 import java.util.List;
 

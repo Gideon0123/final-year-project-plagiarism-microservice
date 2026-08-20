@@ -1,7 +1,7 @@
 package com.example.PLAGIARISM_SERVICE.service.impl;
 
 import com.example.PLAGIARISM_SERVICE.dto.PreprocessedText;
-import com.example.PLAGIARISM_SERVICE.service.DocumentStructureCleaner;
+import com.example.PLAGIARISM_SERVICE.component.DocumentStructureCleaner;
 import com.example.PLAGIARISM_SERVICE.service.TextPreprocessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

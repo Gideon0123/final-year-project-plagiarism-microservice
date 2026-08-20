@@ -1,4 +1,4 @@
-package com.example.PLAGIARISM_SERVICE.service;
+package com.example.PLAGIARISM_SERVICE.component;
 
 import org.springframework.stereotype.Component;
 
