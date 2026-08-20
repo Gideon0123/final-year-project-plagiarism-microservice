@@ -9,14 +9,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
         name = "RESEARCH-SERVICE",
-        contextId = "researchServiceClient",
+        contextId = "researchFeignClient",
         configuration = FeignConfig.class
 )
-public interface ResearchServiceClient {
+public interface ResearchFeignClient {
 
-    @GetMapping("/research/papers/{id}")
+    @GetMapping("/research/papers/{paperId}")
     ApiResponse<ResearchPaperResponse> getPaperById(
-            @PathVariable Long id
+            @PathVariable("paperId") Long paperId
     );
 }
-

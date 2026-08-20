@@ -4,7 +4,7 @@ import com.example.PLAGIARISM_SERVICE.dto.ApiResponse;
 import com.example.PLAGIARISM_SERVICE.dto.ResearchPaperResponse;
 import com.example.PLAGIARISM_SERVICE.exceptions.ResourceNotFoundException;
 import com.example.PLAGIARISM_SERVICE.feign.ResearchClientService;
-import com.example.PLAGIARISM_SERVICE.feign.ResearchServiceClient;
+import com.example.PLAGIARISM_SERVICE.feign.ResearchFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ResearchClientServiceImpl implements ResearchClientService {
 
-    private final ResearchServiceClient researchServiceClient;
+    private final ResearchFeignClient researchFeignClient;
 
     @Override
     public ResearchPaperResponse getPaper(
             Long paperId
     ) {
-        ApiResponse<ResearchPaperResponse> response = researchServiceClient.getPaperById(
+        ApiResponse<ResearchPaperResponse> response = researchFeignClient.getPaperById(
                 paperId
         );
 
