@@ -42,4 +42,18 @@ public interface PlagiarismCheckService {
     PlagiarismCheckResponse rerunCheck(
             Long checkId
     );
+
+    PagedResponse<PlagiarismCheckResponse> getMyChecks(
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    );
+
+    PagedResponse<PlagiarismCheckResponse> getAllChecks(
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    );
 }

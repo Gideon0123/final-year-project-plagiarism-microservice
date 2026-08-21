@@ -28,4 +28,9 @@ public interface PlagiarismCheckRepository extends JpaRepository<PlagiarismCheck
     Optional<PlagiarismCheck> findFirstByPaperIdOrderByCreatedAtDesc(
             Long paperId
     );
+
+    Page<PlagiarismCheck> findByAuthorId(
+            Long authorId,
+            Pageable pageable
+    );
 }

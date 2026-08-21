@@ -149,4 +149,32 @@ public class PlagiarismCheckController {
                         .build()
         );
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<PagedResponse<PlagiarismCheckResponse>>> getMyChecks(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            HttpServletRequest request
+    ) {
+        int adjustedPage = Math.max(page - 1, 0);
+        PagedResponse<PlagiarismCheckResponse> response =
+                plagiarismCheckService.getMyChecks(
+                        adjustedPage, size, sortBy, sortDirection
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.<PagedResponse<PlagiarismCheckResponse>>builder()
+                        .success(true)
+                        .message("Checks fetched successfully")
+                        .status(HttpStatus.OK.value())
+                        .data(response)
+                        .errors(null)
+                        .path(request.getRequestURI())
+                        .traceId(TraceIdUtil.generate())
+                        .timestamp(LocalDateTime.now())
+                        .build()
+        );
+    }
 }

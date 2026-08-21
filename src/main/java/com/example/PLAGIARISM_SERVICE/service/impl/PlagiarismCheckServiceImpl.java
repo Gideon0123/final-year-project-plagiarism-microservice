@@ -36,6 +36,7 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
     private final ResearchTextIndexService researchTextIndexService;
     private final SimilarityService similarityService;
     private final ReportService reportService;
+    private final CurrentUserService currentUserService;
 
     private final PlagiarismCheckRepository checkRepository;
     private final PlagiarismMatchRepository matchRepository;
@@ -270,5 +271,25 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
                         .build();
 
         return createCheck(request);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<PlagiarismCheckResponse> getMyChecks(
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    ) {
+        Long userId = currentUserService.getCurrentUser().getId();
+
+        Pageable pageable = buildPageable(page, size, sortBy, sortDirection);
+        Page<PlagiarismCheckResponse> checks = checkRepository.findByAuthorId(
+                        userId,
+                        pageable
+                )
+                .map(mapper::toResponse);
+
+        return new PagedResponse<>(checks);
     }
 }
