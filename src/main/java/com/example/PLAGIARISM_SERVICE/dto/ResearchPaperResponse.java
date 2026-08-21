@@ -14,6 +14,7 @@ public record ResearchPaperResponse(
         String abstractText,
         String keywords,
         Long authorId,
+        String authorEmail,
         String fileName,
         String contentType,
         Long fileSize,

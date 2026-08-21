@@ -290,9 +290,7 @@ public class PlagiarismCheckController {
     }
 
     @GetMapping("/paper/{paperId}/status")
-    public ResponseEntity<
-            ApiResponse<PlagiarismCheckStatusResponse>
-            > getPaperStatus(
+    public ResponseEntity<ApiResponse<PlagiarismCheckStatusResponse>> getPaperStatus(
             @PathVariable Long paperId,
             HttpServletRequest request
     ) {

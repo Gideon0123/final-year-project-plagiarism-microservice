@@ -17,13 +17,15 @@ public class PlagiarismEventPublisherImpl implements PlagiarismEventPublisher {
 
     @Override
     public void publishCompleted(
-            PlagiarismCheck check
+            PlagiarismCheck check,
+            String authorEmail
     ) {
         PlagiarismCheckCompletedEvent event =
                 PlagiarismCheckCompletedEvent.builder()
                         .checkId(check.getId())
                         .paperId(check.getPaperId())
                         .authorId(check.getAuthorId())
+                        .authorEmail(authorEmail)
                         .similarityPercentage(check.getSimilarityPercentage())
                         .result(check.getResult().name())
                         .summary(check.getSummary())
@@ -34,11 +36,6 @@ public class PlagiarismEventPublisherImpl implements PlagiarismEventPublisher {
                 RabbitMQConstants.PLAGIARISM_EXCHANGE,
                 RabbitMQConstants.PLAGIARISM_ROUTING_KEY,
                 event
-        );
-
-        log.info(
-                "Published plagiarism event checkId={}",
-                check.getId()
         );
     }
 }

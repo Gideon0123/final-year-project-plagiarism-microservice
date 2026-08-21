@@ -10,6 +10,7 @@ public record PlagiarismCheckCompletedEvent(
         Long checkId,
         Long paperId,
         Long authorId,
+        String authorEmail,
         Double similarityPercentage,
         String result,
         String summary,

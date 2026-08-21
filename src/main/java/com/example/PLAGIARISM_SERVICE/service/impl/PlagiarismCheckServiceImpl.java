@@ -60,8 +60,6 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
     public PlagiarismCheckResponse createCheck(
             CreatePlagiarismCheckRequest request
     ) {
-
-        // implementation here
         ResearchPaperResponse paper = researchClientService.getPaper(
                 request.paperId()
         );
@@ -160,7 +158,7 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
             check.setReport(report);
 
             check = checkRepository.save(check);
-            eventPublisher.publishCompleted(check);
+            eventPublisher.publishCompleted(check, paper.authorEmail());
             return mapper.toResponse(check);
 
         } catch (Exception ex){
