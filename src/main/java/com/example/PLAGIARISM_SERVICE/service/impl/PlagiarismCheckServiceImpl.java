@@ -253,4 +253,22 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
         return mapper.toMatchResponse(match);
     }
+
+    @Override
+    public PlagiarismCheckResponse rerunCheck(
+            Long checkId
+    ) {
+        PlagiarismCheck existingCheck = checkRepository.findById(checkId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                                "Plagiarism check not found"
+                        )
+                );
+
+        CreatePlagiarismCheckRequest request =
+                CreatePlagiarismCheckRequest.builder()
+                        .paperId(existingCheck.getPaperId())
+                        .build();
+
+        return createCheck(request);
+    }
 }

@@ -38,4 +38,8 @@ public interface PlagiarismCheckService {
     PlagiarismMatchResponse getMatch(
             Long id
     );
+
+    PlagiarismCheckResponse rerunCheck(
+            Long checkId
+    );
 }
