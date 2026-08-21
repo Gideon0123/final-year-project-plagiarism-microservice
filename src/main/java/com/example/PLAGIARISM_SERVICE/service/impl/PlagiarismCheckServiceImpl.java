@@ -8,6 +8,7 @@ import com.example.PLAGIARISM_SERVICE.enums.CheckStatus;
 import com.example.PLAGIARISM_SERVICE.exceptions.ResourceNotFoundException;
 import com.example.PLAGIARISM_SERVICE.mapper.PlagiarismMapper;
 import com.example.PLAGIARISM_SERVICE.payload.PagedResponse;
+import com.example.PLAGIARISM_SERVICE.publisher.PlagiarismEventPublisher;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismCheckRepository;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismMatchRepository;
 import com.example.PLAGIARISM_SERVICE.service.*;
@@ -37,10 +38,9 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
     private final SimilarityService similarityService;
     private final ReportService reportService;
     private final CurrentUserService currentUserService;
-
+    private final PlagiarismEventPublisher eventPublisher;
     private final PlagiarismCheckRepository checkRepository;
     private final PlagiarismMatchRepository matchRepository;
-
     private final PlagiarismMapper mapper;
 
     private Pageable buildPageable(
@@ -160,6 +160,7 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
             check.setReport(report);
 
             check = checkRepository.save(check);
+            eventPublisher.publishCompleted(check);
             return mapper.toResponse(check);
 
         } catch (Exception ex){
