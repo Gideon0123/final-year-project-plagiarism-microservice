@@ -7,10 +7,15 @@ import com.example.PLAGIARISM_SERVICE.entity.ResearchTextIndex;
 import com.example.PLAGIARISM_SERVICE.enums.CheckStatus;
 import com.example.PLAGIARISM_SERVICE.exceptions.ResourceNotFoundException;
 import com.example.PLAGIARISM_SERVICE.mapper.PlagiarismMapper;
+import com.example.PLAGIARISM_SERVICE.payload.PagedResponse;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismCheckRepository;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismMatchRepository;
 import com.example.PLAGIARISM_SERVICE.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +41,19 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
     private final PlagiarismMatchRepository matchRepository;
 
     private final PlagiarismMapper mapper;
+
+    private Pageable buildPageable(
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    ) {
+        Sort sort = sortDirection.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        return PageRequest.of(page, size, sort);
+    }
 
     @Override
     public PlagiarismCheckResponse createCheck(
@@ -117,13 +135,10 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
             }
             matchRepository.saveAll(matches);
 
-            String report = reportService.generateReport(check, matches);
-            check.setReport(report);
             check.setMatches(matches);
 
             boolean passed = similarity.similarityPercentage() < DEFAULT_THRESHOLD;
 
-            check.setMatches(matches);
             check.setSimilarityPercentage(similarity.similarityPercentage());
             check.setCompletedAt(LocalDateTime.now());
             check.setStatus(CheckStatus.COMPLETED);
@@ -136,12 +151,12 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
                     : "Similarity exceeds threshold"
             );
 
-            String report1 = reportService.generateReport(
+            String report = reportService.generateReport(
                     check,
                     matches
             );
 
-            check.setReport(report1);
+            check.setReport(report);
 
             check = checkRepository.save(check);
             return mapper.toResponse(check);
@@ -174,16 +189,21 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PlagiarismCheckResponse> getChecksByPaper(
-            Long paperId
+    public PagedResponse<PlagiarismCheckResponse> getChecksByPaper(
+            Long paperId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
     ) {
-        return checkRepository
-                .findByPaperIdOrderByCreatedAtDesc(
-                        paperId
+        Pageable pageable = buildPageable(page, size, sortBy, sortDirection);
+        Page<PlagiarismCheckResponse> checks = checkRepository.findByPaperId(
+                        paperId,
+                        pageable
                 )
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+                .map(mapper::toResponse);
+
+        return new PagedResponse<>(checks);
     }
 
     @Override
@@ -199,5 +219,38 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
         );
 
         return mapper.toResponse(check);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<PlagiarismMatchResponse> getMatches(
+            Long checkId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    ) {
+        Pageable pageable = buildPageable(page, size, sortBy, sortDirection);
+        Page<PlagiarismMatchResponse> matches = matchRepository.findByPlagiarismCheckId(
+                        checkId,
+                        pageable
+                )
+                .map(mapper::toMatchResponse);
+
+        return new PagedResponse<>(matches);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PlagiarismMatchResponse getMatch(
+            Long id
+    ) {
+        PlagiarismMatch match = matchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                                "Match not found"
+                        )
+                );
+
+        return mapper.toMatchResponse(match);
     }
 }

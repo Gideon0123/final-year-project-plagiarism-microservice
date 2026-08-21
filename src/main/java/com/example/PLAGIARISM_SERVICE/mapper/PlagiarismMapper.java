@@ -11,5 +11,5 @@ public interface PlagiarismMapper {
 
     PlagiarismCheckResponse toResponse(PlagiarismCheck plagiarismCheck);
 
-    PlagiarismMatchResponse toResponse(PlagiarismMatch plagiarismMatch);
+    PlagiarismMatchResponse toMatchResponse(PlagiarismMatch plagiarismMatch);
 }

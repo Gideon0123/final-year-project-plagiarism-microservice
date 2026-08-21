@@ -23,9 +23,7 @@ public interface PlagiarismCheckRepository extends JpaRepository<PlagiarismCheck
 
     long countByStatus(CheckStatus status);
 
-    List<PlagiarismCheck> findByPaperIdOrderByCreatedAtDesc(
-            Long paperId
-    );
+    Page<PlagiarismCheck> findByPaperId(Long paperId, Pageable pageable);
 
     Optional<PlagiarismCheck> findFirstByPaperIdOrderByCreatedAtDesc(
             Long paperId

@@ -4,6 +4,7 @@ import com.example.PLAGIARISM_SERVICE.dto.ApiResponse;
 import com.example.PLAGIARISM_SERVICE.dto.CreatePlagiarismCheckRequest;
 import com.example.PLAGIARISM_SERVICE.dto.ExtractedTextResponse;
 import com.example.PLAGIARISM_SERVICE.dto.PlagiarismCheckResponse;
+import com.example.PLAGIARISM_SERVICE.payload.PagedResponse;
 import com.example.PLAGIARISM_SERVICE.service.PlagiarismCheckService;
 import com.example.PLAGIARISM_SERVICE.service.ResearchFileService;
 import com.example.PLAGIARISM_SERVICE.utils.TraceIdUtil;
@@ -15,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -93,17 +93,27 @@ public class PlagiarismController {
     }
 
     @GetMapping("/paper/{paperId}")
-    public ResponseEntity<ApiResponse<List<PlagiarismCheckResponse>>> getChecksByPaper(
+    public ResponseEntity<ApiResponse<PagedResponse<PlagiarismCheckResponse>>> getChecksByPaper(
             @PathVariable Long paperId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
             HttpServletRequest request
     ) {
-        List<PlagiarismCheckResponse> response =
+        int adjustedPage = Math.max(page - 1, 0);
+        PagedResponse<PlagiarismCheckResponse> response =
                 plagiarismCheckService.getChecksByPaper(
-                        paperId
+                        paperId,
+                        adjustedPage,
+                        size,
+                        sortBy,
+                        sortDirection
                 );
 
         return ResponseEntity.ok(
-                ApiResponse.<List<PlagiarismCheckResponse>>builder()
+                ApiResponse.<PagedResponse<PlagiarismCheckResponse>>
+                                builder()
                         .success(true)
                         .message("Checks fetched successfully")
                         .status(HttpStatus.OK.value())

@@ -7,6 +7,9 @@ public record PlagiarismMatchResponse(
         Long id,
         Long sourcePaperId,
         Double similarityPercentage,
-        String matchingText
+        String matchingText,
+        String sourceExcerpt,
+        Integer sourcePage,
+        Integer targetPage
 ) {
 }

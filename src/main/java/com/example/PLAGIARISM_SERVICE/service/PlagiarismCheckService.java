@@ -2,8 +2,8 @@ package com.example.PLAGIARISM_SERVICE.service;
 
 import com.example.PLAGIARISM_SERVICE.dto.CreatePlagiarismCheckRequest;
 import com.example.PLAGIARISM_SERVICE.dto.PlagiarismCheckResponse;
-
-import java.util.List;
+import com.example.PLAGIARISM_SERVICE.dto.PlagiarismMatchResponse;
+import com.example.PLAGIARISM_SERVICE.payload.PagedResponse;
 
 public interface PlagiarismCheckService {
 
@@ -15,11 +15,27 @@ public interface PlagiarismCheckService {
             Long id
     );
 
-    List<PlagiarismCheckResponse> getChecksByPaper(
-            Long paperId
+    PagedResponse<PlagiarismCheckResponse> getChecksByPaper(
+            Long paperId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
     );
 
     PlagiarismCheckResponse getLatestCheck(
             Long paperId
+    );
+
+    PagedResponse<PlagiarismMatchResponse> getMatches(
+            Long checkId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    );
+
+    PlagiarismMatchResponse getMatch(
+            Long id
     );
 }
