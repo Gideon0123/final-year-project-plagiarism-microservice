@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -76,8 +77,37 @@ public class ReportServiceImpl implements ReportService {
 
         return PlagiarismReportResponse.builder()
                 .checkId(check.getId())
+                .paperId(check.getPaperId())
+                .similarityPercentage(check.getSimilarityPercentage())
+                .thresholdPercentage(check.getThresholdPercentage())
+                .result(check.getResult())
+                .summary(check.getSummary())
+                .startedAt(check.getStartedAt())
+                .completedAt(check.getCompletedAt())
                 .report(check.getReport())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] downloadReport(
+            Long checkId
+    ) {
+        PlagiarismCheck check = checkRepository.findById(checkId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                                "Plagiarism check not found"
+                        )
+                );
+
+        String report = check.getReport();
+
+        if(report == null || report.isBlank()) {
+            throw new ResourceNotFoundException(
+                    "No report available"
+            );
+        }
+
+        return report.getBytes(StandardCharsets.UTF_8);
     }
 
 

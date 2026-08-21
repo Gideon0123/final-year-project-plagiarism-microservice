@@ -1,16 +1,16 @@
 package com.example.PLAGIARISM_SERVICE.controller;
 
-import com.example.PLAGIARISM_SERVICE.dto.ApiResponse;
-import com.example.PLAGIARISM_SERVICE.dto.CreatePlagiarismCheckRequest;
-import com.example.PLAGIARISM_SERVICE.dto.ExtractedTextResponse;
-import com.example.PLAGIARISM_SERVICE.dto.PlagiarismCheckResponse;
+import com.example.PLAGIARISM_SERVICE.dto.*;
 import com.example.PLAGIARISM_SERVICE.payload.PagedResponse;
 import com.example.PLAGIARISM_SERVICE.service.PlagiarismCheckService;
+import com.example.PLAGIARISM_SERVICE.service.ReportService;
 import com.example.PLAGIARISM_SERVICE.service.ResearchFileService;
 import com.example.PLAGIARISM_SERVICE.utils.TraceIdUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +24,7 @@ public class PlagiarismController {
 
     private final ResearchFileService researchFileService;
     private final PlagiarismCheckService plagiarismCheckService;
+    private final ReportService reportService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'RESEARCHER', 'REVIEWER')")
     @GetMapping("/extract/{paperId}")
@@ -146,5 +147,45 @@ public class PlagiarismController {
                         .timestamp(LocalDateTime.now())
                         .build()
         );
+    }
+
+    @GetMapping("/{id}/report")
+    public ResponseEntity<ApiResponse<PlagiarismReportResponse>> getReport(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
+        PlagiarismReportResponse response = reportService.getReport(id);
+
+        return ResponseEntity.ok(
+                ApiResponse
+                        .<PlagiarismReportResponse>builder()
+                        .success(true)
+                        .message("Report fetched successfully")
+                        .status(HttpStatus.OK.value())
+                        .data(response)
+                        .errors(null)
+                        .path(request.getRequestURI())
+                        .traceId(TraceIdUtil.generate())
+                        .timestamp(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    @GetMapping("/{id}/report/download")
+    public ResponseEntity<byte[]> downloadReport(
+            @PathVariable Long id
+    ) {
+        byte[] report = reportService.downloadReport(id);
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=plagiarism-report-" +
+                                id +
+                                ".txt"
+                )
+                .contentType(MediaType.TEXT_PLAIN)
+                .contentLength(report.length)
+                .body(report);
     }
 }

@@ -1,6 +1,5 @@
 package com.example.PLAGIARISM_SERVICE.service;
 
-import com.example.PLAGIARISM_SERVICE.dto.PlagiarismCheckResponse;
 import com.example.PLAGIARISM_SERVICE.dto.PlagiarismReportResponse;
 import com.example.PLAGIARISM_SERVICE.entity.PlagiarismCheck;
 import com.example.PLAGIARISM_SERVICE.entity.PlagiarismMatch;
@@ -15,5 +14,6 @@ public interface ReportService {
 
     PlagiarismReportResponse getReport(Long checkId);
 
+    byte[] downloadReport(Long checkId);
 
 }
