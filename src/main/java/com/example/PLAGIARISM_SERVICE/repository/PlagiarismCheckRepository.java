@@ -22,4 +22,12 @@ public interface PlagiarismCheckRepository extends JpaRepository<PlagiarismCheck
     List<PlagiarismCheck> findByAuthorId(Long authorId);
 
     long countByStatus(CheckStatus status);
+
+    List<PlagiarismCheck> findByPaperIdOrderByCreatedAtDesc(
+            Long paperId
+    );
+
+    Optional<PlagiarismCheck> findFirstByPaperIdOrderByCreatedAtDesc(
+            Long paperId
+    );
 }

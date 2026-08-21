@@ -5,6 +5,7 @@ import com.example.PLAGIARISM_SERVICE.entity.PlagiarismCheck;
 import com.example.PLAGIARISM_SERVICE.entity.PlagiarismMatch;
 import com.example.PLAGIARISM_SERVICE.entity.ResearchTextIndex;
 import com.example.PLAGIARISM_SERVICE.enums.CheckStatus;
+import com.example.PLAGIARISM_SERVICE.exceptions.ResourceNotFoundException;
 import com.example.PLAGIARISM_SERVICE.mapper.PlagiarismMapper;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismCheckRepository;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismMatchRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,6 +30,7 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
     private final CandidateRetrievalService candidateRetrievalService;
     private final ResearchTextIndexService researchTextIndexService;
     private final SimilarityService similarityService;
+    private final ReportService reportService;
 
     private final PlagiarismCheckRepository checkRepository;
     private final PlagiarismMatchRepository matchRepository;
@@ -55,73 +58,146 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
         check = checkRepository.save(check);
 
-        ExtractedTextResponse extracted = researchFileService.retrieveAndExtract(
-                paper.id()
-        );
+        try {
+            ExtractedTextResponse extracted = researchFileService.retrieveAndExtract(
+                    paper.id()
+            );
 
-        List<ResearchCandidateResponse> candidates =
-                candidateRetrievalService.retrieveCandidates();
+            List<ResearchCandidateResponse> candidates =
+                    candidateRetrievalService.retrieveCandidates();
 
-        List<ComparisonDocument> comparisonDocuments =
-                candidates.stream()
+            List<ComparisonDocument> comparisonDocuments =
+                    candidates.stream()
 
-                        .filter(candidate ->
-                                !candidate.id().equals(
-                                        paper.id()
-                                )
-                        )
-                        .map(candidate -> {
-                            ResearchTextIndex index = researchTextIndexService
-                                    .getByPaperId(candidate.id());
+                            .filter(candidate ->
+                                    !candidate.id().equals(
+                                            paper.id()
+                                    )
+                            )
+                            .map(candidate -> {
+                                ResearchTextIndex index = researchTextIndexService
+                                        .getByPaperId(candidate.id());
 
-                            return ComparisonDocument.builder()
-                                    .paperId(candidate.id())
-                                    .title(candidate.title())
-                                    .text(index.getNormalizedText())
+                                return ComparisonDocument.builder()
+                                        .paperId(candidate.id())
+                                        .title(candidate.title())
+                                        .text(index.getNormalizedText())
+                                        .build();
+                            })
+                            .toList();
+
+            SimilarityResult similarity = similarityService.compare(
+                    paper.id(),
+                    extracted.text(),
+                    comparisonDocuments
+            );
+
+            List<PlagiarismMatch> matches = new ArrayList<>();
+            for(DocumentMatchResult matchResult : similarity.matches()) {
+
+                for(MatchingPassage passage : matchResult.passages()) {
+
+                    PlagiarismMatch match =
+                            PlagiarismMatch.builder()
+                                    .plagiarismCheck(check)
+                                    .sourcePaperId(matchResult.paperId())
+                                    .similarityPercentage(
+                                            matchResult.similarityPercentage()
+                                    )
+                                    .matchingText(
+                                            passage.submittedPassage()
+                                    )
+                                    .sourceExcerpt(
+                                            passage.matchedPassage()
+                                    )
                                     .build();
-                        })
-                        .toList();
 
-        SimilarityResult similarity = similarityService.compare(
-                paper.id(),
-                extracted.text(),
-                comparisonDocuments
-        );
-
-        for(DocumentMatchResult matchResult : similarity.matches()) {
-
-            for(MatchingPassage passage : matchResult.passages()) {
-
-                PlagiarismMatch match =
-                        PlagiarismMatch.builder()
-                                .plagiarismCheck(check)
-                                .sourcePaperId(matchResult.paperId())
-                                .similarityPercentage(
-                                        matchResult.similarityPercentage()
-                                )
-                                .matchingText(passage.submittedPassage())
-                                .sourceExcerpt(passage.sourcePassage())
-                                .build();
-
-                matchRepository.save(match);
+                    matches.add(match);
+                }
             }
+            matchRepository.saveAll(matches);
+
+            String report = reportService.generateReport(check, matches);
+            check.setReport(report);
+            check.setMatches(matches);
+
+            boolean passed = similarity.similarityPercentage() < DEFAULT_THRESHOLD;
+
+            check.setMatches(matches);
+            check.setSimilarityPercentage(similarity.similarityPercentage());
+            check.setCompletedAt(LocalDateTime.now());
+            check.setStatus(CheckStatus.COMPLETED);
+
+            check.setResult(passed ? com.example.PLAGIARISM_SERVICE.enums.SimilarityResult.PASSED
+                    : com.example.PLAGIARISM_SERVICE.enums.SimilarityResult.FAILED
+            );
+
+            check.setSummary(passed ? "Similarity below threshold"
+                    : "Similarity exceeds threshold"
+            );
+
+            String report1 = reportService.generateReport(
+                    check,
+                    matches
+            );
+
+            check.setReport(report1);
+
+            check = checkRepository.save(check);
+            return mapper.toResponse(check);
+
+        } catch (Exception ex){
+
+            check.setStatus(CheckStatus.FAILED);
+            check.setErrorMessage(ex.getMessage());
+            check.setCompletedAt(LocalDateTime.now());
+            checkRepository.save(check);
+
+            throw ex;
         }
-        boolean passed = similarity.similarityPercentage() < DEFAULT_THRESHOLD;
 
-        check.setSimilarityPercentage(similarity.similarityPercentage());
-        check.setCompletedAt(LocalDateTime.now());
-        check.setStatus(CheckStatus.COMPLETED);
+    }
 
-        check.setResult(passed ? com.example.PLAGIARISM_SERVICE.enums.SimilarityResult.PASSED
-                : com.example.PLAGIARISM_SERVICE.enums.SimilarityResult.FAILED
-        );
+    @Override
+    @Transactional(readOnly = true)
+    public PlagiarismCheckResponse getCheck(
+            Long id
+    ) {
+        PlagiarismCheck check = checkRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                                "Plagiarism check not found"
+                        )
+                );
 
-        check.setSummary(passed ? "Similarity below threshold"
-                : "Similarity exceeds threshold"
-        );
-
-        check = checkRepository.save(check);
         return mapper.toResponse(check);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlagiarismCheckResponse> getChecksByPaper(
+            Long paperId
+    ) {
+        return checkRepository
+                .findByPaperIdOrderByCreatedAtDesc(
+                        paperId
+                )
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PlagiarismCheckResponse getLatestCheck(
+            Long paperId
+    ) {
+        PlagiarismCheck check = checkRepository.findFirstByPaperIdOrderByCreatedAtDesc(
+                paperId
+        ).orElseThrow(() -> new ResourceNotFoundException(
+                        "No plagiarism checks found"
+                )
+        );
+
+        return mapper.toResponse(check);
     }
 }

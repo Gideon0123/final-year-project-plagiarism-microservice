@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,6 +66,72 @@ public class PlagiarismController {
                         .status(HttpStatus.OK.value())
                         .data(response)
                         .path(httpRequest.getRequestURI())
+                        .traceId(TraceIdUtil.generate())
+                        .timestamp(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PlagiarismCheckResponse>> getCheck(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
+        PlagiarismCheckResponse response = plagiarismCheckService.getCheck(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<PlagiarismCheckResponse>builder()
+                        .success(true)
+                        .message("Check fetched successfully")
+                        .status(HttpStatus.OK.value())
+                        .data(response)
+                        .path(request.getRequestURI())
+                        .traceId(TraceIdUtil.generate())
+                        .timestamp(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    @GetMapping("/paper/{paperId}")
+    public ResponseEntity<ApiResponse<List<PlagiarismCheckResponse>>> getChecksByPaper(
+            @PathVariable Long paperId,
+            HttpServletRequest request
+    ) {
+        List<PlagiarismCheckResponse> response =
+                plagiarismCheckService.getChecksByPaper(
+                        paperId
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.<List<PlagiarismCheckResponse>>builder()
+                        .success(true)
+                        .message("Checks fetched successfully")
+                        .status(HttpStatus.OK.value())
+                        .data(response)
+                        .path(request.getRequestURI())
+                        .traceId(TraceIdUtil.generate())
+                        .timestamp(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    @GetMapping("/paper/{paperId}/latest")
+    public ResponseEntity<ApiResponse<PlagiarismCheckResponse>> getLatestCheck(
+            @PathVariable Long paperId,
+            HttpServletRequest request
+    ) {
+        PlagiarismCheckResponse response =
+                plagiarismCheckService.getLatestCheck(
+                        paperId
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.<PlagiarismCheckResponse>builder()
+                        .success(true)
+                        .message("Latest check fetched successfully")
+                        .status(HttpStatus.OK.value())
+                        .data(response)
+                        .path(request.getRequestURI())
                         .traceId(TraceIdUtil.generate())
                         .timestamp(LocalDateTime.now())
                         .build()

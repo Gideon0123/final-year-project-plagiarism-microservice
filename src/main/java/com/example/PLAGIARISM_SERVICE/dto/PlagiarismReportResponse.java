@@ -6,8 +6,8 @@ import lombok.Builder;
 @Builder
 public record PlagiarismReportResponse(
         Long checkId,
-        Double similarityPercentage,
-        SimilarityResult result,
+//        Double similarityPercentage,
+//        SimilarityResult result,
         String report
 ) {
 }
