@@ -1,8 +1,6 @@
 package com.example.PLAGIARISM_SERVICE.service;
 
-import com.example.PLAGIARISM_SERVICE.dto.CreatePlagiarismCheckRequest;
-import com.example.PLAGIARISM_SERVICE.dto.PlagiarismCheckResponse;
-import com.example.PLAGIARISM_SERVICE.dto.PlagiarismMatchResponse;
+import com.example.PLAGIARISM_SERVICE.dto.*;
 import com.example.PLAGIARISM_SERVICE.payload.PagedResponse;
 
 public interface PlagiarismCheckService {
@@ -55,5 +53,17 @@ public interface PlagiarismCheckService {
             int size,
             String sortBy,
             String sortDirection
+    );
+
+    void deleteCheck(Long id);
+
+    PlagiarismStatisticsResponse getStatistics();
+
+    PlagiarismCheckStatusResponse getCheckStatus(
+            Long checkId
+    );
+
+    PlagiarismCheckStatusResponse getPaperStatus(
+            Long paperId
     );
 }

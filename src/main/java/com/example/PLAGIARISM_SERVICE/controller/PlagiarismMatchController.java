@@ -15,12 +15,12 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/plagiarism/matches")
+@RequestMapping("/plagiarism/match")
 public class PlagiarismMatchController {
 
     private final PlagiarismCheckService plagiarismCheckService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/matches")
     public ResponseEntity<ApiResponse<PagedResponse<PlagiarismMatchResponse>>> getMatches(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") int page,

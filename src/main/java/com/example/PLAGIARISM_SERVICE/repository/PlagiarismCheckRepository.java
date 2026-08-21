@@ -2,6 +2,7 @@ package com.example.PLAGIARISM_SERVICE.repository;
 
 import com.example.PLAGIARISM_SERVICE.entity.PlagiarismCheck;
 import com.example.PLAGIARISM_SERVICE.enums.CheckStatus;
+import com.example.PLAGIARISM_SERVICE.enums.SimilarityResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,5 +33,9 @@ public interface PlagiarismCheckRepository extends JpaRepository<PlagiarismCheck
     Page<PlagiarismCheck> findByAuthorId(
             Long authorId,
             Pageable pageable
+    );
+
+    long countByResult(
+            SimilarityResult result
     );
 }

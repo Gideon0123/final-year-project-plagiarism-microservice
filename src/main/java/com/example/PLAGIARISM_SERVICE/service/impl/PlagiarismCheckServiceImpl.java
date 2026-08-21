@@ -292,4 +292,116 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
         return new PagedResponse<>(checks);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<PlagiarismCheckResponse> getAllChecks(
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    ) {
+
+        Pageable pageable = buildPageable(page, size, sortBy, sortDirection);
+        Page<PlagiarismCheckResponse> checks =
+                checkRepository.findAll(pageable).map(mapper::toResponse);
+
+        return new PagedResponse<>(checks);
+    }
+
+    @Override
+    public void deleteCheck(
+            Long id
+    ) {
+        PlagiarismCheck check = checkRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException(
+                        "Check not found"
+                )
+        );
+
+        checkRepository.delete(check);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PlagiarismStatisticsResponse getStatistics() {
+
+        List<PlagiarismCheck> checks = checkRepository.findAll();
+
+        double averageSimilarity = checks.stream()
+                .mapToDouble(PlagiarismCheck::getSimilarityPercentage)
+                .average()
+                .orElse(0.0);
+
+        return PlagiarismStatisticsResponse.builder()
+                .totalChecks(checkRepository.count())
+                .completedChecks(
+                        checkRepository.countByStatus(
+                                CheckStatus.COMPLETED
+                        )
+                )
+                .failedChecks(
+                        checkRepository.countByStatus(
+                                CheckStatus.FAILED
+                        )
+                )
+                .passedChecks(
+                        checkRepository.countByResult(
+                                com.example.PLAGIARISM_SERVICE.enums.SimilarityResult.PASSED
+                        )
+                )
+                .flaggedChecks(
+                        checkRepository.countByResult(
+                                com.example.PLAGIARISM_SERVICE.enums.SimilarityResult.FAILED
+                        )
+                )
+                .averageSimilarity(averageSimilarity)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PlagiarismCheckStatusResponse getCheckStatus(
+            Long checkId
+    ) {
+        PlagiarismCheck check = checkRepository.findById(checkId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                                "Plagiarism check not found"
+                        )
+                );
+
+        return PlagiarismCheckStatusResponse.builder()
+                .checkId(check.getId())
+                .paperId(check.getPaperId())
+                .status(check.getStatus())
+                .similarityPercentage(check.getSimilarityPercentage())
+                .result(check.getResult())
+                .startedAt(check.getStartedAt())
+                .completedAt(check.getCompletedAt())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PlagiarismCheckStatusResponse getPaperStatus(
+            Long paperId
+    ) {
+
+        PlagiarismCheck check = checkRepository.findFirstByPaperIdOrderByCreatedAtDesc(
+                        paperId
+                ).orElseThrow(() -> new ResourceNotFoundException(
+                        "No plagiarism checks found"
+                )
+        );
+
+        return PlagiarismCheckStatusResponse.builder()
+                .checkId(check.getId())
+                .paperId(check.getPaperId())
+                .status(check.getStatus())
+                .similarityPercentage(check.getSimilarityPercentage())
+                .result(check.getResult())
+                .startedAt(check.getStartedAt())
+                .completedAt(check.getCompletedAt())
+                .build();
+    }
 }
