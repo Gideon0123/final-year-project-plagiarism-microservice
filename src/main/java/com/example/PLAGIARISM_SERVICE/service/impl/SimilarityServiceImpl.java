@@ -67,7 +67,6 @@ public class SimilarityServiceImpl implements SimilarityService {
             PreprocessedText submitted,
             ComparisonDocument document
     ) {
-
         PreprocessedText candidate = textPreprocessingService.preprocess(
                 document.text()
         );
@@ -85,9 +84,7 @@ public class SimilarityServiceImpl implements SimilarityService {
         return DocumentMatchResult.builder()
                 .paperId(document.paperId())
                 .title(document.title())
-                .similarityPercentage(
-                        round(similarity)
-                )
+                .similarityPercentage(round(similarity))
                 .passages(passages)
                 .build();
     }

@@ -29,9 +29,7 @@ public class TextPreprocessingServiceImpl implements TextPreprocessingService {
         }
 
         String cleanedText = documentStructureCleaner.removeRepeatedLines(text);
-
         String normalizedText = normalize(cleanedText);
-
         List<String> tokens = tokenize(normalizedText);
 
         return PreprocessedText.builder()
@@ -68,9 +66,7 @@ public class TextPreprocessingServiceImpl implements TextPreprocessingService {
             return List.of();
         }
 
-        return Arrays.stream(
-                        text.split("\\s+")
-                )
+        return Arrays.stream(text.split("\\s+"))
                 .map(String::trim)
                 .filter(token -> !token.isBlank())
                 .toList();

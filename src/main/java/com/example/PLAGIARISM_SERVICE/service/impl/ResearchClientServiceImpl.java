@@ -1,9 +1,10 @@
-package com.example.PLAGIARISM_SERVICE.service;
+package com.example.PLAGIARISM_SERVICE.service.impl;
 
 import com.example.PLAGIARISM_SERVICE.dto.ApiResponse;
 import com.example.PLAGIARISM_SERVICE.dto.ResearchPaperResponse;
 import com.example.PLAGIARISM_SERVICE.exceptions.ResourceNotFoundException;
 import com.example.PLAGIARISM_SERVICE.feign.ResearchFeignClient;
+import com.example.PLAGIARISM_SERVICE.service.ResearchClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

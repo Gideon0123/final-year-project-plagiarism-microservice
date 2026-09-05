@@ -41,9 +41,7 @@ public class TextExtractionServiceImpl
 
         return ExtractedTextResponse.builder()
                 .text(extractedText)
-                .wordCount(
-                        extractedText.split("\\s+").length
-                )
+                .wordCount(extractedText.split("\\s+").length)
                 .characterCount(extractedText.length())
                 .build();
     }

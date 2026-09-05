@@ -64,14 +64,13 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
                 request.paperId()
         );
 
-        PlagiarismCheck check =
-                PlagiarismCheck.builder()
-                        .paperId(paper.id())
-                        .authorId(paper.authorId())
-                        .status(CheckStatus.PROCESSING)
-                        .thresholdPercentage(DEFAULT_THRESHOLD)
-                        .startedAt(LocalDateTime.now())
-                        .build();
+        PlagiarismCheck check = PlagiarismCheck.builder()
+                .paperId(paper.id())
+                .authorId(paper.authorId())
+                .status(CheckStatus.PROCESSING)
+                .thresholdPercentage(DEFAULT_THRESHOLD)
+                .startedAt(LocalDateTime.now())
+                .build();
 
         check = checkRepository.save(check);
 
@@ -114,20 +113,13 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
                 for(MatchingPassage passage : matchResult.passages()) {
 
-                    PlagiarismMatch match =
-                            PlagiarismMatch.builder()
-                                    .plagiarismCheck(check)
-                                    .sourcePaperId(matchResult.paperId())
-                                    .similarityPercentage(
-                                            matchResult.similarityPercentage()
-                                    )
-                                    .matchingText(
-                                            passage.submittedPassage()
-                                    )
-                                    .sourceExcerpt(
-                                            passage.matchedPassage()
-                                    )
-                                    .build();
+                    PlagiarismMatch match = PlagiarismMatch.builder()
+                            .plagiarismCheck(check)
+                            .sourcePaperId(matchResult.paperId())
+                            .similarityPercentage(matchResult.similarityPercentage())
+                            .matchingText(passage.submittedPassage())
+                            .sourceExcerpt(passage.matchedPassage())
+                            .build();
 
                     matches.add(match);
                 }
@@ -150,10 +142,7 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
                     : "Similarity exceeds threshold"
             );
 
-            String report = reportService.generateReport(
-                    check,
-                    matches
-            );
+            String report = reportService.generateReport(check, matches);
 
             check.setReport(report);
 

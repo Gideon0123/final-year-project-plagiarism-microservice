@@ -14,8 +14,8 @@ public class PdfExtractionService {
     public String extractText(
             byte[] fileContent
     ) {
-        try (PDDocument document = Loader.loadPDF(fileContent)
-        ) {
+        try (PDDocument document = Loader.loadPDF(fileContent))
+        {
             PDFTextStripper stripper = new PDFTextStripper();
 
             return stripper.getText(document);

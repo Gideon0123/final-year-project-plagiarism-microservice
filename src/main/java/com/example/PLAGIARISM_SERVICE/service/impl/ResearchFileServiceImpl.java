@@ -78,7 +78,6 @@ public class ResearchFileServiceImpl implements ResearchFileService {
                 paperId
         );
 
-
         return extractedText;
     }
 

@@ -32,14 +32,13 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
             Long paperId
     ) {
         if(repository.existsByPaperId(paperId)) {
-            return repository.findByPaperId(paperId
-            ).orElseThrow();
+            return repository.findByPaperId(paperId).
+                    orElseThrow(() -> new ResourceNotFoundException("Paper Not Found"));
         }
 
-        ResearchPaperResponse paper =
-                researchClientService.getPaper(
-                        paperId
-                );
+        ResearchPaperResponse paper = researchClientService.getPaper(
+                paperId
+        );
 
         ExtractedTextResponse extracted = researchFileService.retrieveAndExtract(
                 paperId
@@ -49,20 +48,15 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
                 extracted.text()
         );
 
-        ResearchTextIndex index =
-                ResearchTextIndex.builder()
-                        .paperId(paperId)
-                        .title(paper.title())
-                        .authorId(paper.authorId())
-                        .rawText(extracted.text())
-                        .normalizedText(
-                                preprocessed.normalizedText()
-                        )
-                        .tokenCount(
-                                preprocessed.tokens().size()
-                        )
-                        .indexedAt(LocalDateTime.now())
-                        .build();
+        ResearchTextIndex index = ResearchTextIndex.builder()
+                .paperId(paperId)
+                .title(paper.title())
+                .authorId(paper.authorId())
+                .rawText(extracted.text())
+                .normalizedText(preprocessed.normalizedText())
+                .tokenCount(preprocessed.tokens().size())
+                .indexedAt(LocalDateTime.now())
+                .build();
 
         return repository.save(index);
     }

@@ -15,21 +15,18 @@ public class FileDownloadServiceImpl implements FileDownloadService {
 
     private final ResearchFileClient researchFileClient;
 
-
     @Override
     public byte[] downloadResearchFile(
             Long paperId
     ) {
-
         log.info(
                 "Requesting research file from Research Service, paperId={}",
                 paperId
         );
 
-        ResponseEntity<byte[]> response =
-                researchFileClient.downloadResearchFile(
-                        paperId
-                );
+        ResponseEntity<byte[]> response = researchFileClient.downloadResearchFile(
+                paperId
+        );
 
         if (response == null) {
             throw new FileStorageException(
