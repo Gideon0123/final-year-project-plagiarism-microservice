@@ -3,6 +3,7 @@ package com.example.PLAGIARISM_SERVICE.controller;
 import com.example.PLAGIARISM_SERVICE.dto.*;
 import com.example.PLAGIARISM_SERVICE.payload.PagedResponse;
 import com.example.PLAGIARISM_SERVICE.service.PlagiarismCheckService;
+import com.example.PLAGIARISM_SERVICE.utils.Idempotent;
 import com.example.PLAGIARISM_SERVICE.utils.TraceIdUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,8 @@ public class PlagiarismCheckController {
 
     private final PlagiarismCheckService plagiarismCheckService;
 
-//    @PostMapping("/checks")
     @PostMapping
+    @Idempotent(ttlMinutes = 2)
     @PreAuthorize("hasAnyRole('RESEARCHER','ADMIN')")
     public ResponseEntity<ApiResponse<PlagiarismCheckResponse>> createCheck(
             @RequestBody CreatePlagiarismCheckRequest request,
@@ -128,6 +129,7 @@ public class PlagiarismCheckController {
     }
 
     @PostMapping("/{id}/rerun")
+    @Idempotent(ttlMinutes = 2)
     public ResponseEntity<ApiResponse<PlagiarismCheckResponse>> rerunCheck(
             @PathVariable Long id,
             HttpServletRequest request
@@ -228,6 +230,7 @@ public class PlagiarismCheckController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @Idempotent(ttlMinutes = 3)
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteCheck(
             @PathVariable Long id,
