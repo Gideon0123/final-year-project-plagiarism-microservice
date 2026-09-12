@@ -12,7 +12,9 @@ import com.example.PLAGIARISM_SERVICE.publisher.PlagiarismEventPublisher;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismCheckRepository;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismMatchRepository;
 import com.example.PLAGIARISM_SERVICE.service.*;
+import com.example.PLAGIARISM_SERVICE.utils.CacheNames;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -164,6 +166,11 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_CHECKS,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".check(#id)"
+    )
     public PlagiarismCheckResponse getCheck(
             Long id
     ) {

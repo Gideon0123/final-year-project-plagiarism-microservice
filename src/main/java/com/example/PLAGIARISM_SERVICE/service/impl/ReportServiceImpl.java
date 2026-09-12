@@ -109,6 +109,4 @@ public class ReportServiceImpl implements ReportService {
 
         return report.getBytes(StandardCharsets.UTF_8);
     }
-
-
 }

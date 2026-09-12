@@ -30,7 +30,7 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
     @Transactional
     public ResearchTextIndex createIndex(
             Long paperId
-    ) {
+    ) { 
         if(repository.existsByPaperId(paperId)) {
             return repository.findByPaperId(paperId).
                     orElseThrow(() -> new ResourceNotFoundException("Paper Not Found"));
