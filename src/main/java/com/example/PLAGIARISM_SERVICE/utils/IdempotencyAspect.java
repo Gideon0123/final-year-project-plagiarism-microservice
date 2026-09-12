@@ -1,6 +1,10 @@
 package com.example.PLAGIARISM_SERVICE.utils;
 
+import com.example.PLAGIARISM_SERVICE.entity.IdempotencyResult;
+import com.example.PLAGIARISM_SERVICE.entity.RequestFingerprint;
+import com.example.PLAGIARISM_SERVICE.exceptions.MissingIdempotencyKeyException;
 import com.example.PLAGIARISM_SERVICE.service.CurrentUserService;
+import com.example.PLAGIARISM_SERVICE.service.IdempotencyService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
