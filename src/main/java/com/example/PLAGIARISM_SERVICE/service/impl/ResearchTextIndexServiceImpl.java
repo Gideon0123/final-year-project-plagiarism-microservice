@@ -12,6 +12,7 @@ import com.example.PLAGIARISM_SERVICE.service.ResearchTextIndexService;
 import com.example.PLAGIARISM_SERVICE.service.TextPreprocessingService;
 import com.example.PLAGIARISM_SERVICE.utils.CacheNames;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,11 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
 
     @Override
     @Transactional
+//    @CacheEvict(
+//            value = CacheNames.RESEARCH_TEXT_INDEX,
+//            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+//                    ".textIndex(#paperId)"
+//    )
     public ResearchTextIndex createIndex(
             Long paperId
     ) {
@@ -65,11 +71,11 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheNames.RESEARCH_TEXT_INDEX,
-            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
-                    ".textIndex(#paperId)"
-    )
+//    @Cacheable(
+//            value = CacheNames.RESEARCH_TEXT_INDEX,
+//            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+//                    ".textIndex(#paperId)"
+//    )
     public ResearchTextIndex getByPaperId(
             Long paperId
     ) {
@@ -82,6 +88,11 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
 
     @Override
     @Transactional
+//    @CacheEvict(
+//            value = CacheNames.RESEARCH_TEXT_INDEX,
+//            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+//                    ".textIndex(#paperId)"
+//    )
     public void rebuildIndex(
             Long paperId
     ) {
@@ -91,10 +102,10 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheNames.RESEARCH_TEXT_INDEX,
-            key = "'candidates:excluding:' + #excludedPaperId"
-    )
+//    @Cacheable(
+//            value = CacheNames.RESEARCH_TEXT_INDEX,
+//            key = "'candidates:excluding:' + #excludedPaperId"
+//    )
     public List<ResearchTextIndex> getAllCandidates(
             Long excludedPaperId
     ) {

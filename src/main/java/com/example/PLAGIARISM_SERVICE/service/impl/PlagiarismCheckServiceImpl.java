@@ -14,7 +14,9 @@ import com.example.PLAGIARISM_SERVICE.repository.PlagiarismMatchRepository;
 import com.example.PLAGIARISM_SERVICE.service.*;
 import com.example.PLAGIARISM_SERVICE.utils.CacheNames;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +60,26 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
         return PageRequest.of(page, size, sort);
     }
 
+    @Caching(
+            evict = {
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_CHECKS,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_MATCHES,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_REPORTS,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_STATISTICS,
+                            allEntries = true
+                    )
+            }
+    )
     @Override
     public PlagiarismCheckResponse createCheck(
             CreatePlagiarismCheckRequest request
@@ -272,6 +294,26 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
         return mapper.toMatchResponse(match);
     }
 
+    @Caching(
+            evict = {
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_CHECKS,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_MATCHES,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_REPORTS,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_STATISTICS,
+                            allEntries = true
+                    )
+            }
+    )
     @Override
     public PlagiarismCheckResponse rerunCheck(
             Long checkId
@@ -337,6 +379,26 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
         return new PagedResponse<>(checks);
     }
 
+    @Caching(
+            evict = {
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_CHECKS,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_MATCHES,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_REPORTS,
+                            allEntries = true
+                    ),
+                    @CacheEvict(
+                            value = CacheNames.PLAGIARISM_STATISTICS,
+                            allEntries = true
+                    )
+            }
+    )
     @Override
     public void deleteCheck(
             Long id
@@ -428,7 +490,6 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
     public PlagiarismCheckStatusResponse getPaperStatus(
             Long paperId
     ) {
-
         PlagiarismCheck check = checkRepository.findFirstByPaperIdOrderByCreatedAtDesc(
                         paperId
                 ).orElseThrow(() -> new ResourceNotFoundException(

@@ -1,7 +1,8 @@
 package com.example.PLAGIARISM_SERVICE.config;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,19 +15,37 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 public class CacheConfig {
 
     @Bean
-    public RedisCacheConfiguration redisCacheConfiguration(
-            ObjectMapper objectMapper
-    ) {
-        ObjectMapper mapper = objectMapper.copy();
+    public RedisCacheConfiguration redisCacheConfiguration() {
 
-        mapper.activateDefaultTyping(
-                mapper.getPolymorphicTypeValidator(),
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-        );
+        ObjectMapper redisObjectMapper = new ObjectMapper();
 
+        // Support LocalDateTime, LocalDate, etc.
+        redisObjectMapper.registerModule(new JavaTimeModule());
+
+        /*
+         * Only application classes are allowed to participate
+         * in polymorphic deserialization.
+         */
+        BasicPolymorphicTypeValidator typeValidator =
+                BasicPolymorphicTypeValidator.builder()
+                        .allowIfSubType("com.example.PLAGIARISM_SERVICE")
+                        .build();
+
+        /*
+         * Let Spring Data Redis configure its own type resolver.
+         *
+         * This is important. Do NOT call:
+         *
+         * activateDefaultTyping(...)
+         *
+         * ourselves.
+         */
         GenericJackson2JsonRedisSerializer serializer =
-                new GenericJackson2JsonRedisSerializer(mapper);
+                GenericJackson2JsonRedisSerializer.builder()
+                        .objectMapper(redisObjectMapper)
+                        .defaultTyping(true)
+                        .typeHintPropertyName("@class")
+                        .build();
 
         return RedisCacheConfiguration.defaultCacheConfig()
                 .serializeValuesWith(
@@ -34,5 +53,4 @@ public class CacheConfig {
                                 .fromSerializer(serializer)
                 );
     }
-
 }
