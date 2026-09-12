@@ -7,7 +7,9 @@ import com.example.PLAGIARISM_SERVICE.exceptions.ResourceNotFoundException;
 import com.example.PLAGIARISM_SERVICE.mapper.PlagiarismMapper;
 import com.example.PLAGIARISM_SERVICE.repository.PlagiarismCheckRepository;
 import com.example.PLAGIARISM_SERVICE.service.ReportService;
+import com.example.PLAGIARISM_SERVICE.utils.CacheNames;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +68,11 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_REPORTS,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".report(#checkId)"
+    )
     public PlagiarismReportResponse getReport(
             Long checkId
     ) {

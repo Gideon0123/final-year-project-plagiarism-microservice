@@ -10,7 +10,9 @@ import com.example.PLAGIARISM_SERVICE.service.ResearchClientService;
 import com.example.PLAGIARISM_SERVICE.service.ResearchFileService;
 import com.example.PLAGIARISM_SERVICE.service.ResearchTextIndexService;
 import com.example.PLAGIARISM_SERVICE.service.TextPreprocessingService;
+import com.example.PLAGIARISM_SERVICE.utils.CacheNames;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +32,7 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
     @Transactional
     public ResearchTextIndex createIndex(
             Long paperId
-    ) { 
+    ) {
         if(repository.existsByPaperId(paperId)) {
             return repository.findByPaperId(paperId).
                     orElseThrow(() -> new ResourceNotFoundException("Paper Not Found"));
@@ -63,6 +65,11 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.RESEARCH_TEXT_INDEX,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".textIndex(#paperId)"
+    )
     public ResearchTextIndex getByPaperId(
             Long paperId
     ) {
@@ -84,6 +91,10 @@ public class ResearchTextIndexServiceImpl implements ResearchTextIndexService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.RESEARCH_TEXT_INDEX,
+            key = "'candidates:excluding:' + #excludedPaperId"
+    )
     public List<ResearchTextIndex> getAllCandidates(
             Long excludedPaperId
     ) {

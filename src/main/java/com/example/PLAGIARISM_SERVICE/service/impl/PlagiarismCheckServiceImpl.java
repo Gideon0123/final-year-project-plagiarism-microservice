@@ -185,6 +185,12 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_CHECKS,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".checksByPaper(" +
+                    "#paperId, #page, #size, #sortBy, #sortDirection)"
+    )
     public PagedResponse<PlagiarismCheckResponse> getChecksByPaper(
             Long paperId,
             int page,
@@ -204,6 +210,11 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_CHECKS,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".latestCheck(#paperId)"
+    )
     public PlagiarismCheckResponse getLatestCheck(
             Long paperId
     ) {
@@ -219,6 +230,12 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_MATCHES,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".matches(" +
+                    "#checkId, #page, #size, #sortBy, #sortDirection)"
+    )
     public PagedResponse<PlagiarismMatchResponse> getMatches(
             Long checkId,
             int page,
@@ -238,6 +255,11 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_MATCHES,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".match(#id)"
+    )
     public PlagiarismMatchResponse getMatch(
             Long id
     ) {
@@ -270,6 +292,11 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_CHECKS,
+            key = "@plagiarismCacheKey.myChecks(" +
+                    "#page, #size, #sortBy, #sortDirection)"
+    )
     public PagedResponse<PlagiarismCheckResponse> getMyChecks(
             int page,
             int size,
@@ -290,6 +317,12 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_CHECKS,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".allChecks(" +
+                    "#page, #size, #sortBy, #sortDirection)"
+    )
     public PagedResponse<PlagiarismCheckResponse> getAllChecks(
             int page,
             int size,
@@ -319,6 +352,10 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_STATISTICS,
+            key = "'global'"
+    )
     public PlagiarismStatisticsResponse getStatistics() {
 
         List<PlagiarismCheck> checks = checkRepository.findAll();
@@ -356,6 +393,11 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_CHECKS,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".checkStatus(#checkId)"
+    )
     public PlagiarismCheckStatusResponse getCheckStatus(
             Long checkId
     ) {
@@ -378,6 +420,11 @@ public class PlagiarismCheckServiceImpl implements PlagiarismCheckService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PLAGIARISM_CHECKS,
+            key = "T(com.example.PLAGIARISM_SERVICE.utils.CacheKeys)" +
+                    ".paperStatus(#paperId)"
+    )
     public PlagiarismCheckStatusResponse getPaperStatus(
             Long paperId
     ) {
